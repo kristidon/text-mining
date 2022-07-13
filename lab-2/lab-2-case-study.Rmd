@@ -491,6 +491,7 @@ ccss_text <-
 Finally, let's combine our `ccss_text` and `ngss_text` into a single data frame by using the `bind_rows()` function from `dplyr` to simply supplying the data frames that you want to combine as arguments:
 
 ```{r}
+#append rows 
 tweets <- bind_rows(ngss_text, ccss_text)
 ```
 
@@ -603,6 +604,7 @@ bing
 nrc <- get_sentiments("nrc")
 
 nrc
+# not exclusive to one word; looks at it in context
 ```
 
 And just out of curiosity, let's take a look at the `loughran` lexicon as well:

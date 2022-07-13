@@ -1,0 +1,117 @@
+---
+title: 'Intro to TM Badge'
+subtitle: "LASER Institute TM Learning Lab 1"
+author: "Kristi Donaldson"
+date: "`r format(Sys.Date(),'%B %e, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+![](img/tmb.png){width="300"}
+
+The final activity for each learning lab provides space to work with data and to reflect on how the concepts and techniques introduced in each lab might apply to your own research.
+
+To earn a badge for each lab, you are required to respond to a set of prompts for two parts: 
+
+-   In Part I, you will reflect on your understanding of key concepts and begin to think about potential next steps for your own study.
+
+-   In Part II, you will create a simple data product in R that demonstrates your ability to apply a data analysis technique introduced in this learning lab.
+
+### Part I: Reflect and Plan
+
+Use the institutional library (e.g. [NCSU Library](https://www.lib.ncsu.edu/#articles)), [Google Scholar](https://scholar.google.com/) or search engine to locate a research article, presentation, or resource that applies text mining to an educational context or topic of interest. More specifically, **locate a text mining study that visualize text data.**
+
+1.  Provide an APA citation for your selected study.
+
+    -   Dobie, T.E., & Sherin, B. (2021). The language of mathematics teaching: A text mining approach to explore the zeitgeist of US mathematics education. *Educational Studies in Mathematics*, *107*(1), 159-188. <https://doi.org/10.1007/s10649-020-10019-8>
+
+2.  How does the visualization address research questions?
+
+    -   RQ1: How can text mining techniques be utilized to provide insight into the zeitgeist of a period in mathematics education? Histogram of the number and length of articles in a mathematics education journal over 10 years
+
+    -   RQ2: What does the written language of mathematics teachers and teacher educators tell us about the zeitgeist of this moment in mathematics education in the USA? Table of common phrases (e.g., Common Core), US Lexicon terms from the International Lexicon Project (e.g., reasoning, problem-solving), and equity-related terms (e.g., social justice, privilege) and number of times mentioned, number and percentage of articles in which it was mentioned. The authors included tables for commonly and infrequently used US Lexicon terms and described potential reasons for their presence or absence (e.g., journal focus, lack of standardization, conversations in classrooms vs. journal articles). Lastly, the authors included a few scatterplots of the number of times a word or phrase (per 1000 words) over time (2009-2019) to show increasing use of the term equity after 2015, and a peak in the use of Common Core (2012-2017). I appreciated looking at these different visualizations after the first lab, especially thinking about the absence of terms and changes in use over time.
+
+Draft a research question for a population you may be interested in studying, or that would be of interest to educational researchers, and that would require the collection of text data and answer the following questions: why are Milwaukee Public Schools (MPS) students taking computer science courses?
+
+1.  What text data would need to be collected?
+
+    -   Student pre-survey question asking "why are you taking this computer science class?"
+
+2.  For what reason would text data need to be collected in order to address this question?
+
+    -   There are some pre-filled answers, including taking the course because it's a requirement or their friends are taking the course, and then an open-ended "other" response for answers that do not fit into one of the categories
+
+3.  Explain the analytical level at which these text data would need to be collected and analyzed.
+
+    -   Ideally collected from all grade 6-12 students at the beginning of their computer science course each year. Could analyze term frequency, IDF, examine differences in responses across grade levels, and look at changes in responses over time as more computer science courses are offered in MPS
+
+### Part II: Data Product
+
+Use your case study file to create a new word cloud that does not include words that would give you important information about teachers' experiences with professional development. (For example, we did not include "University" in the word cloud describing where scholar came from as it occurs everywhere).
+
+I highly recommend creating a new R script in your lab-1 folder to complete this task. When your code is ready to share, use the code chunk below to share the final code for your model and answer the questions that follow.
+
+```{r, my-data-product}
+# YOUR FINAL CODE HERE
+
+library(dplyr)
+library(tidyverse)
+library(tidytext)
+library(wordcloud2)
+library(summarytools)
+
+opd_survey <- read_csv("data/opd_survey.csv")
+# view(opd_survey) 
+
+# examining responses to some of the other variables
+# how are you using this resource Q20
+# most beneficial aspect of this online resource Q21
+# recommendations for improving online resource Q26; might want to remove "recommend"
+# recommendations for making online learning more effective Q37
+dfSummary(opd_survey)
+
+# removing first two rows; not survey info, missing responses (for ease of wordcloud) & restricting to teacher responses only
+opd_teacher <- opd_survey |>
+  select(ResponseId, Role, Q26) |>
+  slice(-1, -2) |>
+  na.omit() |>
+  filter(Role == "Teacher") |>
+  unnest_tokens(word, Q26)
+view(opd_teacher)
+
+# removing stop words
+opd_clean <- anti_join(opd_teacher, stop_words)
+view(opd_clean)
+
+# remove common words
+remove <- data.frame(word=c("recommend", "recommendations", "recommendation", "user", "suggest", "suggestions"))
+opd_clean <- anti_join(opd_clean, remove)
+view(opd_clean)
+
+opd_counts <- count(opd_clean, word, sort = TRUE)
+head(opd_counts)
+
+wordcloud2(opd_counts)
+
+```
+
+### Knit & Submit
+
+Congratulations, you've completed your Intro to text mining Badge! Complete the following steps to submit your work for review:
+
+1.  Change the name of the `author:` in the [YAML header](https://monashdatafluency.github.io/r-rep-res/yaml-header.html) at the very top of this document to your name. As noted in [Reproducible Research in R](https://monashdatafluency.github.io/r-rep-res/index.html), The YAML header controls the style and feel for knitted document but doesn't actually display in the final output.
+
+2.  Click the yarn icon above to "knit" your data product to a [HTML](https://bookdown.org/yihui/rmarkdown/html-document.html) file that will be saved in your R Project folder.
+
+3.  Commit your changes in GitHub Desktop and push them to your online GitHub repository.
+
+4.  Publish your HTML page the web using one of the following [publishing methods](https://rpubs.com/cathydatascience/518692):
+
+    -   Publish on [RPubs](https://rpubs.com) by clicking the "Publish" button located in the Viewer Pane when you knit your document. Note, you will need to quickly create a RPubs account.
+
+    -   Publishing on GitHub using either [GitHub Pages](https://pages.github.com) or the [HTML previewer](http://htmlpreview.github.io).
+
+5.  Post a new discussion on GitHub to our [Text mining Badges forum](https://github.com/orgs/laser-institute/teams/network-analysis/discussions/3). In your post, include a link to your published web page and a short reflection highlighting one thing you learned from this lab and one thing you'd like to explore further.

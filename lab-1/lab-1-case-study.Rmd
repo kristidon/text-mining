@@ -399,7 +399,7 @@ respectively pertain to educator role, OPD resource they are evaluating,
 and, as illustrated by the second row,
 
 ```{r}
-opd_selected <- select(opd_survey, Role, Resource, Q21)
+opd_selected <- select(opd_survey, Role, Resource...6, Q21)
 ```
 
 Notice that like the bulk of all tidyverse functions, the first input
@@ -463,7 +463,7 @@ That was a lot of code we just wrote to end up with `opd_teacher`. Let's
 review:
 
 ```{r,eval=FALSE}
-opd_selected <- select(opd_survey, Role, Resource, Q21)
+opd_selected <- select(opd_survey, Role, Resource...6, Q21)
 opd_renamed <- rename(opd_selected, text = Q21)
 opd_sliced <- slice(opd_renamed, -1, -2)
 opd_complete <- na.omit(opd_sliced)
@@ -474,7 +474,7 @@ Note that we could have reused `opd_teacher` and simply overwritten it
 each time to prevent creating new objects:
 
 ```{r,eval=F}
-opd_teacher <- select(opd_survey, Role, Resource, Q21)
+opd_teacher <- select(opd_survey, Role, Resource...6, Q21)
 opd_teacher <- rename(opd_teacher, text = Q21)
 opd_teacher <- slice(opd_teacher, -1, -2)
 opd_teacher <- na.omit(opd_teacher)
@@ -490,7 +490,7 @@ simplify these cleaning steps and reduce the code written
 
 ```{r}
 opd_teacher <- opd_survey %>%
-  select(Role, Resource, Q21) %>%
+  select(Role, Resource...6, Q21) %>%
   rename(text = Q21) %>%
   slice(-1, -2) %>%
   na.omit() %>%
@@ -591,7 +591,7 @@ our previous piped chain of functions like so:
 
 ```{r}
 opd_tidy <- opd_survey %>%
-  select(Role, Resource, Q21) %>%
+  select(Role, Resource...6, Q21) %>%
   rename(text = Q21) %>%
   slice(-1, -2) %>%
   na.omit() %>%
@@ -647,6 +647,10 @@ the `word` column with those in the `stop_words` dataset and save it as
 opd_clean <- anti_join(opd_tidy, stop_words)
 
 head(opd_clean)
+
+
+csw <- stop_words
+# no idea: csw <- csw($(csw$word=="against"))
 ```
 
 #### Comprehension Check
@@ -774,8 +778,9 @@ count the frequency a word occurs for a select `Resource` in our
 dataset.
 
 ```{r}
+# mine didn't look the same as below
 opd_resource_counts <- opd_clean %>%
-  count(Resource, word, sort = TRUE)
+  count(Resource...6, word, sort = TRUE)
 
 view(opd_resource_counts)
 ```
@@ -803,8 +808,8 @@ operator:
 
 ```{r}
 opd_frequencies <- opd_clean %>%
-  count(Resource, word, sort = TRUE) %>%
-  group_by(Resource) %>%
+  count(Resource...6, word, sort = TRUE) %>%
+  group_by(Resource...6) %>%
   mutate(proportion = n / sum(n))
 
 opd_frequencies
@@ -853,7 +858,7 @@ data set, we'll calculate word counts for each 'Resource'.
 ```{r}
 opd_words <- opd_teacher %>%
   unnest_tokens(word, text) %>%
-  count(Resource, word, sort = TRUE)
+  count(Resource...6, word, sort = TRUE)
 
 head(opd_words)
 ```
@@ -862,7 +867,7 @@ Next, let's calculate the total words per `Resource` type:
 
 ```{r}
 total_words <- opd_words %>%
-  group_by(Resource) %>%
+  group_by(Resource...6) %>%
   summarise(total = sum(n))
 
 total_words
@@ -882,8 +887,9 @@ tf-idf statistic for each word and assess it's relative importance to a
 given online resource type:
 
 ```{r}
+# why are stop words here? - this file still has stop words; not sure why we didn't use one of the other files without
 opd_tf_idf <- opd_totals %>%
-  bind_tf_idf(word, Resource, n)
+  bind_tf_idf(word, Resource...6, n)
 
 opd_tf_idf
 
@@ -1043,13 +1049,13 @@ small multiple for our `opd_frequencies` data set instead of the
 library(forcats)
 
 opd_frequencies %>%
-  filter(Resource != "Calendar") %>% # remove Calendar responses, too few. 
-  group_by(Resource) %>%
+  filter(Resource...6 != "Calendar") %>% # remove Calendar responses, too few. 
+  group_by(Resource...6) %>%
   slice_max(proportion, n = 5) %>%
   ungroup() %>%
-  ggplot(aes(proportion, fct_reorder(word, proportion), fill = Resource)) +
+  ggplot(aes(proportion, fct_reorder(word, proportion), fill = Resource...6)) +
   geom_col(show.legend = FALSE) +
-  facet_wrap(~Resource, ncol = 3, scales = "free")
+  facet_wrap(~Resource...6, ncol = 3, scales = "free")
 ```
 
 #### Comprehension Check
@@ -1256,16 +1262,16 @@ removed to create my new `opd_tf_idf` data frame.
 ```{r}
 
 opd_resource_counts <- opd_clean %>%
-  count(Resource, word)
+  count(Resource...6, word)
 
 total_words <- opd_resource_counts %>%
-  group_by(Resource) %>%
+  group_by(Resource...6) %>%
   summarize(total = sum(n))
 
 opd_words <- left_join(opd_resource_counts, total_words)
 
 opd_tf_idf <- opd_words %>%
-  bind_tf_idf(word, Resource, n)
+  bind_tf_idf(word, Resource...6, n)
 ```
 
 Then I'll use the `filter()` function to remove any response pertaining
